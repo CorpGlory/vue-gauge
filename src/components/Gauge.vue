@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 
-import * as d3 from '@types/d3';
+import * as d3 from 'd3';
 
 const DEFAULT_COLORS = ['green', 'yellow', 'red'];
 
@@ -30,12 +30,18 @@ export default class Gauge extends Vue {
   @Prop({ required: false, default: 200 })
   width!: number;
 
-  @Prop({ required: false, default: 100 })
+  @Prop({ required: false, default: 110 })
   height!: number;
 
+  @Watch('value')
+  onValueChange() {
+    if(this.value !== undefined) {
+      this.renderLine();
+    }
+  }
+
   svg: any = undefined;
-  arc: any = undefined;
-  scale: any = undefined;
+  gaugeCenter: string = "";
 
   get valueRange(): number[] {
     if(this.stops.length < 2) {
@@ -50,27 +56,27 @@ export default class Gauge extends Vue {
 
   renderLine(): void {
     let scale = d3.scaleLinear().domain([0, this.maxValue]).range([0,180]);
-    this.svg.selectAll( '.needle' ).data([this.value])
+    this.svg.selectAll('.needle').data([this.value])
       .transition()
       .ease(d3.easeElasticOut)
       .duration(1000)
-      .attr('transform', function(d: any) {
-        return 'translate(100,100) rotate(' + scale(d) + ')'
+      .attr('transform', (d: number) => {
+        return this.gaugeCenter + 'rotate(' + scale(d) + ')'
       });
   }
 
   mounted() {
     this.svg = d3.select('#gauge')
       .append('svg')
-      .attr('width', 200)
-      .attr('height', 100);
+      .attr('width', this.width)
+      .attr('height', this.height);
 
-    this.arc = d3.arc()
+    this.gaugeCenter = `translate(${this.width / 2},${this.height - 10})`;
+
+    let arc = d3.arc()
       .innerRadius(50)
       .outerRadius(80)
       .padAngle(0);
-
-    let scale = d3.scaleLinear().domain([0, this.maxValue]).range([0,180]);
 
     let pie = d3.pie()
       .startAngle( (-1*Math.PI) / 2 )
@@ -81,33 +87,27 @@ export default class Gauge extends Vue {
     		.data(arcs)
     		.enter()
     		.append('path')
-        .style('fill', function(d: any, i: number){
-          return DEFAULT_COLORS[i];
+        .style('fill', (d: object, i: number) => {
+          return this.colors[i];
         })
-        .attr('d', this.arc)
-        .attr( 'transform', 'translate(100,100)' )
+        .attr('d', arc)
+        .attr( 'transform', this.gaugeCenter )
 
     let needle = this.svg.selectAll('.needle')
       .data([0])
       .enter()
       .append('line')
       .attr('x1', 0)
-      .attr('x2', -78)
+      .attr('x2', -80)
       .attr('y1', 0)
       .attr('y2', 0)
       .classed('needle', true)
       .style('stroke', 'black')
-      .attr('transform', function(d: any) {
-        return ' translate(100,100) rotate(' + d + ')'
+      .attr('transform', (d: number) => {
+        return this.gaugeCenter + 'rotate(' + d + ')'
       });
-  
-    this.svg.selectAll( '.needle' ).data([this.value])
-      .transition()
-      .ease(d3.easeElasticOut)
-      .duration(1000)
-      .attr('transform', function(d: any) {
-        return 'translate(100,100) rotate(' + scale(d) + ')'
-      });
+
+    this.renderLine();
   }
 }
 </script>
