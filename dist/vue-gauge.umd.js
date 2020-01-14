@@ -2561,12 +2561,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=56942f9b&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h3',{staticClass:"gauge-title"},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=c34da6c2&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h5',{staticClass:"gauge-title"},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=56942f9b&
+// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=c34da6c2&
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__("99af");
