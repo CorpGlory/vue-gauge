@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h3>Gauge</h3>
-    <div id="gauge"></div>
+    <h3 class="gauge-title">{{ title }}</h3>
+    <div :id="id"></div>
   </div>
 </template>
 
@@ -15,6 +15,9 @@ const DEFAULT_COLORS = ['green', 'yellow', 'red'];
 @Component
 export default class Gauge extends Vue {
 
+  @Prop({ required: true })
+  id!: string;
+
   @Prop({ required: true, default: () => DEFAULT_COLORS })
   colors!: string[];
 
@@ -26,6 +29,9 @@ export default class Gauge extends Vue {
 
   @Prop({ required: true })
   maxValue!: number;
+
+  @Prop({ required: false })
+  title!: string;
 
   @Prop({ required: false, default: 200 })
   width!: number;
@@ -66,7 +72,7 @@ export default class Gauge extends Vue {
   }
 
   mounted() {
-    this.svg = d3.select('#gauge')
+    this.svg = d3.select('#'+this.id)
       .append('svg')
       .attr('width', this.width)
       .attr('height', this.height);
