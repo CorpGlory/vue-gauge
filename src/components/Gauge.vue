@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="gauge-title">{{ title }}</h3>
+    <h5 class="gauge-title">{{ title }}</h5>
     <div :id="id"></div>
   </div>
 </template>
