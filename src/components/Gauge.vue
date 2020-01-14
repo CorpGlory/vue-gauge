@@ -72,7 +72,7 @@ export default class Gauge extends Vue {
   }
 
   mounted() {
-    this.svg = d3.select('#'+this.id)
+    this.svg = d3.select(`#${this.id}`)
       .append('svg')
       .attr('width', this.width)
       .attr('height', this.height);
