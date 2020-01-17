@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="gauge-title">{{ title }}</h5>
+    <h6 class="gauge-title">{{ title }}</h6>
     <div :id="id"></div>
   </div>
 </template>
@@ -11,6 +11,8 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
 import * as d3 from 'd3';
 
 const DEFAULT_COLORS = ['green', 'yellow', 'red'];
+
+const DEFAULT_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 };
 
 @Component
 export default class Gauge extends Vue {
@@ -39,6 +41,15 @@ export default class Gauge extends Vue {
   @Prop({ required: false, default: 110 })
   height!: number;
 
+  @Prop({ required: false, default: () => DEFAULT_MARGIN })
+  margin!: { top: number, right: number, bottom: number, left: number };
+
+  @Prop({ required: false })
+  innerRadius!: number;
+
+  @Prop({ required: false })
+  outerRadius!: number;
+
   @Watch('value')
   onValueChange() {
     if(this.value !== undefined) {
@@ -58,6 +69,14 @@ export default class Gauge extends Vue {
       range.push(this.stops[i]-this.stops[i-1]);
     }
     return range;
+  }
+
+  get gaugeOuterRadius(): number {
+    return this.outerRadius || this.width / 2 - this.margin.left; 
+  }
+
+  get gaugeInnerRadius(): number {
+    return this.innerRadius || this.gaugeOuterRadius * 0.625; 
   }
 
   renderLine(): void {
@@ -80,8 +99,8 @@ export default class Gauge extends Vue {
     this.gaugeCenter = `translate(${this.width / 2},${this.height - 10})`;
 
     let arc = d3.arc()
-      .innerRadius(50)
-      .outerRadius(80)
+      .innerRadius(this.gaugeInnerRadius)
+      .outerRadius(this.gaugeOuterRadius)
       .padAngle(0);
 
     let pie = d3.pie()
@@ -104,7 +123,7 @@ export default class Gauge extends Vue {
       .enter()
       .append('line')
       .attr('x1', 0)
-      .attr('x2', -80)
+      .attr('x2', -1 * this.gaugeOuterRadius)
       .attr('y1', 0)
       .attr('y2', 0)
       .classed('needle', true)
