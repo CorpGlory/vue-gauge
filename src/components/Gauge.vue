@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="gauge-title">{{ title }}</h5>
+    <h6 class="gauge-title">{{ title }}</h6>
     <div :id="id"></div>
   </div>
 </template>
@@ -38,6 +38,9 @@ export default class Gauge extends Vue {
 
   @Prop({ required: false, default: 110 })
   height!: number;
+
+  @Prop({required: false, default: 80 })
+  gaugeLength!: number;
 
   @Watch('value')
   onValueChange() {
@@ -80,8 +83,8 @@ export default class Gauge extends Vue {
     this.gaugeCenter = `translate(${this.width / 2},${this.height - 10})`;
 
     let arc = d3.arc()
-      .innerRadius(50)
-      .outerRadius(80)
+      .innerRadius(0.625 * this.gaugeLength)
+      .outerRadius(this.gaugeLength)
       .padAngle(0);
 
     let pie = d3.pie()
@@ -104,7 +107,7 @@ export default class Gauge extends Vue {
       .enter()
       .append('line')
       .attr('x1', 0)
-      .attr('x2', -80)
+      .attr('x2', -1 * this.gaugeLength)
       .attr('y1', 0)
       .attr('y2', 0)
       .classed('needle', true)
