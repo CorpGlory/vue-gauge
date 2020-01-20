@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h6 class="gauge-title">{{ title }}</h6>
+    <h6 class="gauge-title" v-bind:style="titlePosition">{{ title }}</h6>
     <div :id="id"></div>
   </div>
 </template>
@@ -44,6 +44,9 @@ export default class Gauge extends Vue {
   @Prop({ required: false, default: () => DEFAULT_MARGIN })
   margin!: { top: number, right: number, bottom: number, left: number };
 
+  @Prop({ required: false, default: () => DEFAULT_MARGIN })
+  marginTitle!: { top: number, right: number, bottom: number, left: number };
+
   @Prop({ required: false })
   innerRadius!: number;
 
@@ -79,6 +82,16 @@ export default class Gauge extends Vue {
     return this.innerRadius || this.gaugeOuterRadius * 0.625; 
   }
 
+  get titlePosition(): any {
+    return {
+      margin:
+        `${this.marginTitle.top}px
+        ${this.marginTitle.right}px
+        ${this.marginTitle.bottom}px
+        ${this.marginTitle.left}px`
+    };
+  }
+
   renderLine(): void {
     let scale = d3.scaleLinear().domain([0, this.maxValue]).range([0,180]);
     this.svg.selectAll('.needle').data([this.value])
@@ -104,6 +117,7 @@ export default class Gauge extends Vue {
       .padAngle(0);
 
     let pie = d3.pie()
+      .sort(null)
       .startAngle( (-1*Math.PI) / 2 )
       .endAngle( Math.PI / 2 )
 
