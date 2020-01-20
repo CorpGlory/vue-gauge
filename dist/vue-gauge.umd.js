@@ -2561,12 +2561,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=6269d064&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h6',{staticClass:"gauge-title"},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=7d0b3225&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h6',{staticClass:"gauge-title",style:(_vm.titlePosition)},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=6269d064&
+// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=7d0b3225&
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__("99af");
@@ -15538,7 +15538,7 @@ function (_Vue) {
       this.svg = src_select("#".concat(this.id)).append('svg').attr('width', this.width).attr('height', this.height);
       this.gaugeCenter = "translate(".concat(this.width / 2, ",").concat(this.height - 10, ")");
       var arc = src_arc().innerRadius(this.gaugeInnerRadius).outerRadius(this.gaugeOuterRadius).padAngle(0);
-      var pie = src_pie().startAngle(-1 * Math.PI / 2).endAngle(Math.PI / 2);
+      var pie = src_pie().sort(null).startAngle(-1 * Math.PI / 2).endAngle(Math.PI / 2);
       var arcs = pie(this.valueRange);
       var background = this.svg.selectAll('path').data(arcs).enter().append('path').style('fill', function (d, i) {
         return _this3.colors[i];
@@ -15572,6 +15572,13 @@ function (_Vue) {
     key: "gaugeInnerRadius",
     get: function get() {
       return this.innerRadius || this.gaugeOuterRadius * 0.625;
+    }
+  }, {
+    key: "titlePosition",
+    get: function get() {
+      return {
+        margin: "".concat(this.marginTitle.top, "px\n        ").concat(this.marginTitle.right, "px\n        ").concat(this.marginTitle.bottom, "px\n        ").concat(this.marginTitle.left, "px")
+      };
     }
   }]);
 
@@ -15621,6 +15628,13 @@ __decorate([Prop({
     return DEFAULT_MARGIN;
   }
 })], Gaugevue_type_script_lang_ts_Gauge.prototype, "margin", void 0);
+
+__decorate([Prop({
+  required: false,
+  default: function _default() {
+    return DEFAULT_MARGIN;
+  }
+})], Gaugevue_type_script_lang_ts_Gauge.prototype, "marginTitle", void 0);
 
 __decorate([Prop({
   required: false
