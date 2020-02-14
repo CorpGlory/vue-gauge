@@ -206,6 +206,28 @@ module.exports = !DESCRIPTORS && !fails(function () {
 
 /***/ }),
 
+/***/ "1148":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var toInteger = __webpack_require__("a691");
+var requireObjectCoercible = __webpack_require__("1d80");
+
+// `String.prototype.repeat` method implementation
+// https://tc39.github.io/ecma262/#sec-string.prototype.repeat
+module.exports = ''.repeat || function repeat(count) {
+  var str = String(requireObjectCoercible(this));
+  var result = '';
+  var n = toInteger(count);
+  if (n < 0 || n == Infinity) throw RangeError('Wrong number of repetitions');
+  for (;n > 0; (n >>>= 1) && (str += str)) if (n & 1) result += str;
+  return result;
+};
+
+
+/***/ }),
+
 /***/ "131a":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -517,6 +539,23 @@ defineIterator(String, 'String', function (iterated) {
 /***/ (function(module, exports) {
 
 module.exports = {};
+
+
+/***/ }),
+
+/***/ "408a":
+/***/ (function(module, exports, __webpack_require__) {
+
+var classof = __webpack_require__("c6b6");
+
+// `thisNumberValue` abstract operation
+// https://tc39.github.io/ecma262/#sec-thisnumbervalue
+module.exports = function (value) {
+  if (typeof value != 'number' && classof(value) != 'Number') {
+    throw TypeError('Incorrect invocation');
+  }
+  return +value;
+};
 
 
 /***/ }),
@@ -1810,6 +1849,140 @@ module.exports = function (name) {
 
 /***/ }),
 
+/***/ "b680":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var toInteger = __webpack_require__("a691");
+var thisNumberValue = __webpack_require__("408a");
+var repeat = __webpack_require__("1148");
+var fails = __webpack_require__("d039");
+
+var nativeToFixed = 1.0.toFixed;
+var floor = Math.floor;
+
+var pow = function (x, n, acc) {
+  return n === 0 ? acc : n % 2 === 1 ? pow(x, n - 1, acc * x) : pow(x * x, n / 2, acc);
+};
+
+var log = function (x) {
+  var n = 0;
+  var x2 = x;
+  while (x2 >= 4096) {
+    n += 12;
+    x2 /= 4096;
+  }
+  while (x2 >= 2) {
+    n += 1;
+    x2 /= 2;
+  } return n;
+};
+
+var FORCED = nativeToFixed && (
+  0.00008.toFixed(3) !== '0.000' ||
+  0.9.toFixed(0) !== '1' ||
+  1.255.toFixed(2) !== '1.25' ||
+  1000000000000000128.0.toFixed(0) !== '1000000000000000128'
+) || !fails(function () {
+  // V8 ~ Android 4.3-
+  nativeToFixed.call({});
+});
+
+// `Number.prototype.toFixed` method
+// https://tc39.github.io/ecma262/#sec-number.prototype.tofixed
+$({ target: 'Number', proto: true, forced: FORCED }, {
+  // eslint-disable-next-line max-statements
+  toFixed: function toFixed(fractionDigits) {
+    var number = thisNumberValue(this);
+    var fractDigits = toInteger(fractionDigits);
+    var data = [0, 0, 0, 0, 0, 0];
+    var sign = '';
+    var result = '0';
+    var e, z, j, k;
+
+    var multiply = function (n, c) {
+      var index = -1;
+      var c2 = c;
+      while (++index < 6) {
+        c2 += n * data[index];
+        data[index] = c2 % 1e7;
+        c2 = floor(c2 / 1e7);
+      }
+    };
+
+    var divide = function (n) {
+      var index = 6;
+      var c = 0;
+      while (--index >= 0) {
+        c += data[index];
+        data[index] = floor(c / n);
+        c = (c % n) * 1e7;
+      }
+    };
+
+    var dataToString = function () {
+      var index = 6;
+      var s = '';
+      while (--index >= 0) {
+        if (s !== '' || index === 0 || data[index] !== 0) {
+          var t = String(data[index]);
+          s = s === '' ? t : s + repeat.call('0', 7 - t.length) + t;
+        }
+      } return s;
+    };
+
+    if (fractDigits < 0 || fractDigits > 20) throw RangeError('Incorrect fraction digits');
+    // eslint-disable-next-line no-self-compare
+    if (number != number) return 'NaN';
+    if (number <= -1e21 || number >= 1e21) return String(number);
+    if (number < 0) {
+      sign = '-';
+      number = -number;
+    }
+    if (number > 1e-21) {
+      e = log(number * pow(2, 69, 1)) - 69;
+      z = e < 0 ? number * pow(2, -e, 1) : number / pow(2, e, 1);
+      z *= 0x10000000000000;
+      e = 52 - e;
+      if (e > 0) {
+        multiply(0, z);
+        j = fractDigits;
+        while (j >= 7) {
+          multiply(1e7, 0);
+          j -= 7;
+        }
+        multiply(pow(10, j, 1), 0);
+        j = e - 1;
+        while (j >= 23) {
+          divide(1 << 23);
+          j -= 23;
+        }
+        divide(1 << j);
+        multiply(1, 1);
+        divide(2);
+        result = dataToString();
+      } else {
+        multiply(0, z);
+        multiply(1 << -e, 0);
+        result = dataToString() + repeat.call('0', fractDigits);
+      }
+    }
+    if (fractDigits > 0) {
+      k = result.length;
+      result = sign + (k <= fractDigits
+        ? '0.' + repeat.call('0', fractDigits - k) + result
+        : result.slice(0, k - fractDigits) + '.' + result.slice(k - fractDigits));
+    } else {
+      result = sign + result;
+    } return result;
+  }
+});
+
+
+/***/ }),
+
 /***/ "b727":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2552,15 +2725,18 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=7d0b3225&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=db0bdea0&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h6',{staticClass:"gauge-title",style:(_vm.titlePosition)},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=7d0b3225&
+// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=db0bdea0&
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__("99af");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.to-fixed.js
+var es_number_to_fixed = __webpack_require__("b680");
 
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
 function _classCallCheck(instance, Constructor) {
@@ -15480,11 +15656,12 @@ function defaultConstrain(transform, extent, translateExtent) {
 
 
 
+
 var DEFAULT_COLORS = ['green', 'yellow', 'red'];
 var DEFAULT_MARGIN = {
   top: 0,
   right: 0,
-  bottom: 0,
+  bottom: 20,
   left: 0
 };
 
@@ -15501,6 +15678,8 @@ function (_Vue) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Gauge).apply(this, arguments));
     _this.svg = undefined;
     _this.gaugeCenter = "";
+    _this.minValue = 0;
+    _this.text = undefined;
     return _this;
   }
 
@@ -15509,6 +15688,7 @@ function (_Vue) {
     value: function onValueChange() {
       if (this.value !== undefined) {
         this.renderLine();
+        this.updateValueText();
       }
     }
   }, {
@@ -15522,22 +15702,45 @@ function (_Vue) {
       });
     }
   }, {
+    key: "renderValueText",
+    value: function renderValueText() {
+      this.text = this.svg.selectAll('.value-text').data([0]).enter().append('text').attr('x', -this.gaugeInnerRadius + 2).attr('y', 0).text(this.value.toFixed(2) + " " + this.unit).classed('value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '13px').attr('transform', this.gaugeCenter).style('font-weight', 'bold');
+    }
+  }, {
+    key: "updateValueText",
+    value: function updateValueText() {
+      this.text.text(this.value.toFixed(2) + " " + this.unit);
+    }
+  }, {
+    key: "renderExtremumValuesText",
+    value: function renderExtremumValuesText() {
+      this.svg.selectAll('.min-value-text').data([0]).enter().append('text').attr('x', -this.gaugeOuterRadius).attr('y', this.margin.bottom).text(this.minValue).classed('min-value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '14px').attr('transform', this.gaugeCenter);
+      this.svg.selectAll('.max-value-text').data([0]).enter().append('text').attr('x', this.gaugeInnerRadius).attr('y', this.margin.bottom).attr('width', 40).text(this.maxValue).classed('max-value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '14px').attr('transform', this.gaugeCenter);
+    }
+  }, {
+    key: "renderUnitValue",
+    value: function renderUnitValue() {
+      this.svg.selectAll('.unit-value-text').data([0]).enter().append('text').attr('x', 5).attr('y', 0).text(this.unit).classed('unit-value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '12px').attr('transform', this.gaugeCenter);
+    }
+  }, {
     key: "mounted",
     value: function mounted() {
       var _this3 = this;
 
       this.svg = src_select("#".concat(this.id)).append('svg').attr('width', this.width).attr('height', this.height);
-      this.gaugeCenter = "translate(".concat(this.width / 2, ",").concat(this.height - 10, ")");
+      this.gaugeCenter = "translate(".concat(this.width / 2, ",").concat(this.height - this.margin.bottom, ")");
       var arc = src_arc().innerRadius(this.gaugeInnerRadius).outerRadius(this.gaugeOuterRadius).padAngle(0);
       var pie = src_pie().sort(null).startAngle(-1 * Math.PI / 2).endAngle(Math.PI / 2);
       var arcs = pie(this.valueRange);
       var background = this.svg.selectAll('path').data(arcs).enter().append('path').style('fill', function (d, i) {
         return _this3.colors[i];
       }).attr('d', arc).attr('transform', this.gaugeCenter);
-      var needle = this.svg.selectAll('.needle').data([0]).enter().append('line').attr('x1', 0).attr('x2', -1 * this.gaugeOuterRadius).attr('y1', 0).attr('y2', 0).classed('needle', true).style('stroke', 'black').attr('transform', function (d) {
+      var needle = this.svg.selectAll('.needle').data([0]).enter().append('line').attr('x1', -1 * this.gaugeInnerRadius).attr('x2', -1 * this.gaugeOuterRadius).attr('y1', 0).attr('y2', 0).classed('needle', true).attr('stroke', 'black').attr('stroke-width', '2px').attr('transform', function (d) {
         return _this3.gaugeCenter + 'rotate(' + d + ')';
       });
       this.renderLine();
+      this.renderValueText();
+      this.renderExtremumValuesText();
     }
   }, {
     key: "valueRange",
@@ -15634,6 +15837,15 @@ __decorate([Prop({
 __decorate([Prop({
   required: false
 })], Gaugevue_type_script_lang_ts_Gauge.prototype, "outerRadius", void 0);
+
+__decorate([Prop({
+  required: false,
+  default: false
+})], Gaugevue_type_script_lang_ts_Gauge.prototype, "displayLabel", void 0);
+
+__decorate([Prop({
+  required: false
+})], Gaugevue_type_script_lang_ts_Gauge.prototype, "unit", void 0);
 
 __decorate([Watch('value')], Gaugevue_type_script_lang_ts_Gauge.prototype, "onValueChange", null);
 
