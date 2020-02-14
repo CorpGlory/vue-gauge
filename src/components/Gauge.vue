@@ -12,7 +12,7 @@ import * as d3 from 'd3';
 
 const DEFAULT_COLORS = ['green', 'yellow', 'red'];
 
-const DEFAULT_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 };
+const DEFAULT_MARGIN = { top: 0, right: 0, bottom: 20, left: 0 };
 
 @Component
 export default class Gauge extends Vue {
@@ -53,15 +53,24 @@ export default class Gauge extends Vue {
   @Prop({ required: false })
   outerRadius!: number;
 
+  @Prop({ required: false, default: false })
+  displayLabel!: boolean;
+
+  @Prop({ required: false })
+  unit!: string;
+
   @Watch('value')
   onValueChange() {
     if(this.value !== undefined) {
       this.renderLine();
+      this.updateValueText();
     }
   }
 
   svg: any = undefined;
   gaugeCenter: string = "";
+  minValue = 0;
+  text: any = undefined;
 
   get valueRange(): number[] {
     if(this.stops.length < 2) {
@@ -103,13 +112,74 @@ export default class Gauge extends Vue {
       });
   }
 
+  renderValueText(): void {
+    this.text = this.svg.selectAll('.value-text')
+      .data([0])
+      .enter()
+      .append('text')
+      .attr('x', -this.gaugeInnerRadius + 2)
+      .attr('y', 0)
+      .text(this.value.toFixed(2)+" "+this.unit)
+      .classed('value-text', true)
+      .attr('font-family', 'Poppins, sans-serif')
+      .attr('font-size', '13px')
+      .attr('transform', this.gaugeCenter)
+      .style('font-weight', 'bold');
+  }
+
+  updateValueText(): void {
+    this.text
+      .text(this.value.toFixed(2)+" "+this.unit)
+  }
+
+  renderExtremumValuesText(): void {
+    this.svg.selectAll('.min-value-text')
+      .data([0])
+      .enter()
+      .append('text')
+      .attr('x', -this.gaugeOuterRadius)
+      .attr('y', this.margin.bottom)
+      .text(this.minValue)
+      .classed('min-value-text', true)
+      .attr('font-family', 'Poppins, sans-serif')
+      .attr('font-size', '14px')
+      .attr('transform', this.gaugeCenter);
+
+    this.svg.selectAll('.max-value-text')
+      .data([0])
+      .enter()
+      .append('text')
+      .attr('x', this.gaugeInnerRadius)
+      .attr('y', this.margin.bottom)
+      .attr('width', 40)
+      .text(this.maxValue)
+      .classed('max-value-text', true)
+      .attr('font-family', 'Poppins, sans-serif')
+      .attr('font-size', '14px')
+      .attr('transform', this.gaugeCenter);
+  }
+
+  renderUnitValue() {
+    this.svg.selectAll('.unit-value-text')
+      .data([0])
+      .enter()
+      .append('text')
+      .attr('x', 5)
+      .attr('y', 0)
+      .text(this.unit)
+      .classed('unit-value-text', true)
+      .attr('font-family', 'Poppins, sans-serif')
+      .attr('font-size', '12px')
+      .attr('transform', this.gaugeCenter);
+  }
+
   mounted() {
     this.svg = d3.select(`#${this.id}`)
       .append('svg')
       .attr('width', this.width)
       .attr('height', this.height);
 
-    this.gaugeCenter = `translate(${this.width / 2},${this.height - 10})`;
+    this.gaugeCenter = `translate(${this.width / 2},${this.height - this.margin.bottom})`;
 
     let arc = d3.arc()
       .innerRadius(this.gaugeInnerRadius)
@@ -136,18 +206,20 @@ export default class Gauge extends Vue {
       .data([0])
       .enter()
       .append('line')
-      .attr('x1', 0)
+      .attr('x1', -1 * this.gaugeInnerRadius)
       .attr('x2', -1 * this.gaugeOuterRadius)
       .attr('y1', 0)
       .attr('y2', 0)
       .classed('needle', true)
-      .style('stroke', 'black')
+      .attr('stroke', 'black')
+      .attr('stroke-width', '2px')
       .attr('transform', (d: number) => {
         return this.gaugeCenter + 'rotate(' + d + ')'
       });
 
     this.renderLine();
+    this.renderValueText();
+    this.renderExtremumValuesText();
   }
 }
 </script>
-
