@@ -23,8 +23,8 @@ export default class Gauge extends Vue {
   @Prop({ required: true, default: () => DEFAULT_COLORS })
   colors!: string[];
 
-  @Prop({ required: true })
-  value!: number;
+  @Prop({ required: false })
+  value!: number | undefined;
 
   @Prop({ required: true })
   stops!: number[];
@@ -61,9 +61,11 @@ export default class Gauge extends Vue {
 
   @Watch('value')
   onValueChange() {
+    this.renderLine();
     if(this.value !== undefined) {
-      this.renderLine();
       this.updateValueText();
+    } else {
+      this.renderNoDataText();
     }
   }
 
@@ -101,9 +103,16 @@ export default class Gauge extends Vue {
     };
   }
 
+  get gaugeValue(): number {
+    if(this.value === undefined) {
+      return 0;
+    }
+    return this.value;
+  }
+
   renderLine(): void {
     let scale = d3.scaleLinear().domain([0, this.maxValue]).range([0,180]);
-    this.svg.selectAll('.needle').data([this.value])
+    this.svg.selectAll('.needle').data([this.gaugeValue])
       .transition()
       .ease(d3.easeElasticOut)
       .duration(1000)
@@ -119,7 +128,7 @@ export default class Gauge extends Vue {
       .append('text')
       .attr('x', -this.gaugeInnerRadius + 2)
       .attr('y', 0)
-      .text(this.value.toFixed(2)+" "+this.unit)
+      .text(this.gaugeValue.toFixed(2)+" "+this.unit)
       .classed('value-text', true)
       .attr('font-family', 'Poppins, sans-serif')
       .attr('font-size', '13px')
@@ -129,7 +138,12 @@ export default class Gauge extends Vue {
 
   updateValueText(): void {
     this.text
-      .text(this.value.toFixed(2)+" "+this.unit)
+      .text(this.gaugeValue.toFixed(2)+" "+this.unit)
+  }
+
+  renderNoDataText(): void {
+    this.text
+      .text('No Data');
   }
 
   renderExtremumValuesText(): void {
