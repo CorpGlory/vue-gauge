@@ -2725,12 +2725,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=db0bdea0&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=2869c9ec&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h6',{staticClass:"gauge-title",style:(_vm.titlePosition)},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=db0bdea0&
+// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=2869c9ec&
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__("99af");
@@ -15686,9 +15686,12 @@ function (_Vue) {
   _createClass(Gauge, [{
     key: "onValueChange",
     value: function onValueChange() {
+      this.renderLine();
+
       if (this.value !== undefined) {
-        this.renderLine();
         this.updateValueText();
+      } else {
+        this.renderNoDataText();
       }
     }
   }, {
@@ -15697,19 +15700,24 @@ function (_Vue) {
       var _this2 = this;
 
       var scale = linear_linear().domain([0, this.maxValue]).range([0, 180]);
-      this.svg.selectAll('.needle').data([this.value]).transition().ease(elasticOut).duration(1000).attr('transform', function (d) {
+      this.svg.selectAll('.needle').data([this.gaugeValue]).transition().ease(elasticOut).duration(1000).attr('transform', function (d) {
         return _this2.gaugeCenter + 'rotate(' + scale(d) + ')';
       });
     }
   }, {
     key: "renderValueText",
     value: function renderValueText() {
-      this.text = this.svg.selectAll('.value-text').data([0]).enter().append('text').attr('x', -this.gaugeInnerRadius + 2).attr('y', 0).text(this.value.toFixed(2) + " " + this.unit).classed('value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '13px').attr('transform', this.gaugeCenter).style('font-weight', 'bold');
+      this.text = this.svg.selectAll('.value-text').data([0]).enter().append('text').attr('x', -this.gaugeInnerRadius + 2).attr('y', 0).text(this.gaugeValue.toFixed(2) + " " + this.unit).classed('value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '13px').attr('transform', this.gaugeCenter).style('font-weight', 'bold');
     }
   }, {
     key: "updateValueText",
     value: function updateValueText() {
-      this.text.text(this.value.toFixed(2) + " " + this.unit);
+      this.text.text(this.gaugeValue.toFixed(2) + " " + this.unit);
+    }
+  }, {
+    key: "renderNoDataText",
+    value: function renderNoDataText() {
+      this.text.text('No Data');
     }
   }, {
     key: "renderExtremumValuesText",
@@ -15774,6 +15782,15 @@ function (_Vue) {
         margin: "".concat(this.marginTitle.top, "px\n        ").concat(this.marginTitle.right, "px\n        ").concat(this.marginTitle.bottom, "px\n        ").concat(this.marginTitle.left, "px")
       };
     }
+  }, {
+    key: "gaugeValue",
+    get: function get() {
+      if (this.value === undefined) {
+        return 0;
+      }
+
+      return this.value;
+    }
   }]);
 
   return Gauge;
@@ -15791,7 +15808,7 @@ __decorate([Prop({
 })], Gaugevue_type_script_lang_ts_Gauge.prototype, "colors", void 0);
 
 __decorate([Prop({
-  required: true
+  required: false
 })], Gaugevue_type_script_lang_ts_Gauge.prototype, "value", void 0);
 
 __decorate([Prop({
