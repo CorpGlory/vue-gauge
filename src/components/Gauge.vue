@@ -111,7 +111,11 @@ export default class Gauge extends Vue {
   }
 
   renderLine(): void {
-    let scale = d3.scaleLinear().domain([0, this.maxValue]).range([0,180]);
+    let scale = d3.scaleLinear()
+      .domain([0, this.maxValue])
+      .range([0,180])
+      .clamp(true);
+
     this.svg.selectAll('.needle').data([this.gaugeValue])
       .transition()
       .ease(d3.easeElasticOut)
