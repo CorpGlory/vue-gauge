@@ -130,13 +130,15 @@ export default class Gauge extends Vue {
       .data([0])
       .enter()
       .append('text')
-      .attr('x', -this.gaugeInnerRadius + 2)
-      .attr('y', 0)
+      .attr('x', 0)
+      .attr('y', -5)
       .text(this.gaugeValue.toFixed(2)+" "+this.unit)
       .classed('value-text', true)
       .attr('font-family', 'Poppins, sans-serif')
       .attr('font-size', '13px')
       .attr('transform', this.gaugeCenter)
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'central')
       .style('font-weight', 'bold');
   }
 
