@@ -2725,12 +2725,12 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=3be66b2a&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"55bcbba2-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Gauge.vue?vue&type=template&id=231537af&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('h6',{staticClass:"gauge-title",style:(_vm.titlePosition)},[_vm._v(_vm._s(_vm.title))]),_c('div',{attrs:{"id":_vm.id}})])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=3be66b2a&
+// CONCATENATED MODULE: ./src/components/Gauge.vue?vue&type=template&id=231537af&
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__("99af");
@@ -15707,7 +15707,7 @@ function (_Vue) {
   }, {
     key: "renderValueText",
     value: function renderValueText() {
-      this.text = this.svg.selectAll('.value-text').data([0]).enter().append('text').attr('x', -this.gaugeInnerRadius + 2).attr('y', 0).text(this.gaugeValue.toFixed(2) + " " + this.unit).classed('value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '13px').attr('transform', this.gaugeCenter).style('font-weight', 'bold');
+      this.text = this.svg.selectAll('.value-text').data([0]).enter().append('text').attr('x', 0).attr('y', -5).text(this.gaugeValue.toFixed(2) + " " + this.unit).classed('value-text', true).attr('font-family', 'Poppins, sans-serif').attr('font-size', '13px').attr('transform', this.gaugeCenter).attr('text-anchor', 'middle').attr('alignment-baseline', 'central').style('font-weight', 'bold');
     }
   }, {
     key: "updateValueText",
